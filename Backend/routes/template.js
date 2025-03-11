@@ -1,0 +1,204 @@
+import express from 'express';
+import Website from '../models/Template.js';
+
+const router = express.Router();
+
+// Create a new website with an initial template (HTML/CSS)
+// POST route to add a new website
+
+// Define the PUT route to update a template
+router.put('/:websiteId', async (req, res) => {
+  const { websiteId } = req.params;
+  console.log('Received PUT request for websiteId:', websiteId); 
+  const { pageName, htmlContent, cssContent, htmlFileName, cssFileName } = req.body;
+
+  try {
+    const website = await Website.findById(websiteId);
+    if (!website) {
+      return res.status(404).json({ message: 'Website not found' });
+    }
+
+    // Since 'page' is already provided directly, no need for website.content[pageName]
+    const page = req.body;  // Assuming the page data is passed directly in the request body
+
+    console.log("Page", page, pageName);
+
+    // Update the page content
+    page.htmlContent = htmlContent || page.htmlContent;
+    page.cssContent = cssContent || page.cssContent;
+    page.htmlFileName = htmlFileName || page.htmlFileName;
+    page.cssFileName = cssFileName || page.cssFileName;
+
+    // You can also update the website content directly if needed
+    website.content[pageName] = page;  // If you still want to save the page within website.content
+
+    await website.save();
+    res.status(200).json({ message: 'Page updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating page', error: err.message });
+  }
+});
+
+
+
+
+router.post('/', async (req, res) => {
+    const { name } = req.body; // Get the website name from the request body
+  
+    if (!name) {
+      return res.status(400).json({ message: 'Website name is required' });
+    }
+  
+    try {
+      // Create a new website with the provided name
+      const newWebsite = new Website({
+        name: name,
+        content: {}, // Initialize the content as an empty object
+      });
+  
+      // Save the website to the database
+      const savedWebsite = await newWebsite.save();
+  
+      res.status(201).json(savedWebsite); // Send the saved website back to the client
+    } catch (error) {
+      console.error('Error adding website:', error);
+      res.status(500).json({ message: 'Error adding website' });
+    }
+  });
+
+// Get all websites (templates)
+router.get('/', async (req, res) => {
+    try {
+      // Fetch all websites from the database
+      const websites = await Website.find({});
+      res.status(200).json(websites); // Send the list of websites to the frontend
+    } catch (error) {
+      console.error('Error fetching websites:', error);
+      res.status(500).json({ message: 'Error fetching websites' });
+    }
+  });
+
+// Route to update the website page content
+// router.put('/api/templates/:websiteId', async (req, res) => {
+//   const { websiteId } = req.params;
+//   const { pageName, htmlContent, cssContent, htmlFileName, cssFileName } = req.body;
+
+//   try {
+//     // Find the website by ID
+//     const website = await Website.findById(websiteId);
+//     if (!website) {
+//       return res.status(404).json({ message: 'Website not found' });
+//     }
+
+//     // Check if the page exists within the website content
+//     const page = website.content[pageName];
+//     if (!page) {
+//       return res.status(404).json({ message: 'Page not found' });
+//     }
+
+//     // Update the page's HTML and CSS content
+//     if (htmlContent) page.htmlContent = htmlContent;
+//     if (cssContent) page.cssContent = cssContent;
+//     if (htmlFileName) page.htmlFileName = htmlFileName;
+//     if (cssFileName) page.cssFileName = cssFileName;
+
+//     // Save the updated website object
+//     await website.save();
+
+//     res.status(200).json({ message: 'Page updated successfully' });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
+
+
+// Get details of a specific website template
+router.get('/:id', async (req, res) => {
+  try {
+    const website = await Website.findById(req.params.id);
+    if (!website) {
+      return res.status(404).json({ message: 'Website not found' });
+    }
+    res.json(website);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Delete a website template
+router.delete('/:id', async (req, res) => {
+  try {
+    const website = await Website.findById(req.params.id);
+    if (!website) {
+      return res.status(404).json({ message: 'Website not found' });
+    }
+
+    await website.remove();
+    res.json({ message: 'Website template deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Delete a website template
+// router.delete('/:id', async (req, res) => {
+//     try {
+//       const website = await Website.findById(req.params.id);
+//       if (!website) {
+//         return res.status(404).json({ message: 'Website not found' });
+//       }
+  
+//       await website.remove(); // Remove the website from the database
+//       res.json({ message: 'Website template deleted' });
+//     } catch (err) {
+//       res.status(500).json({ message: err.message });
+//     }
+//   });
+
+  router.get('/:websiteId', (req, res) => {
+    const { websiteId } = req.params;
+    // Fetch the website object from the database using websiteId
+    const website = getWebsiteById(websiteId); // Assume this function is implemented
+    res.json(website);
+  });
+  
+  
+
+// // Define the PUT route to update a template
+// router.put('/:websiteId', async (req, res) => {
+//   const { websiteId } = req.params;
+//   const { pageName, htmlContent, cssContent, htmlFileName, cssFileName } = req.body;
+  
+//   // Logic to handle updating the page
+//   try {
+//     const website = await Website.findById(websiteId);  // Replace with your model
+//     if (!website) {
+//       return res.status(404).json({ message: 'Website not found' });
+//     }
+    
+//     // Assuming website has a 'content' object with pages
+//     const page = website.content[pageName];
+//     if (!page) {
+//       return res.status(404).json({ message: 'Page not found' });
+//     }
+    
+//     // Update the page content
+//     page.htmlContent = htmlContent || page.htmlContent;
+//     page.cssContent = cssContent || page.cssContent;
+//     page.htmlFileName = htmlFileName || page.htmlFileName;
+//     page.cssFileName = cssFileName || page.cssFileName;
+    
+//     await website.save();
+    
+//     res.status(200).json({ message: 'Page updated successfully' });
+//   } catch (err) {
+//     res.status(500).json({ message: 'Error updating page', error: err.message });
+//   }
+// });
+  
+
+
+
+
+export default router;
