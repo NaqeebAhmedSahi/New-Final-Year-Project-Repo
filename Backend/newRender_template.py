@@ -1,6 +1,5 @@
 import json
 import sys
-import os
 from jinja2 import Template
 
 # Ensure the script receives a file path argument
@@ -10,9 +9,6 @@ if len(sys.argv) < 2:
 
 # Get the template file from the command-line argument
 template_file = sys.argv[1]
-
-# Extract the file name from the full path
-template_file_name = os.path.basename(template_file)
 
 # Load the JSON data
 with open("1.json", "r", encoding="utf-8") as file:
@@ -31,8 +27,8 @@ with open(template_file, "r", encoding="utf-8") as file:
 # Create a Jinja2 template object
 template = Template(template_content)
 
-# Extract data based on the template file name
-if template_file_name == "index.html":
+# Extract data based on the template file
+if template_file == "index.html":
     # Data for index.html
     rendered_html = template.render(
         title=response_data["website"]["title"],
@@ -48,29 +44,17 @@ if template_file_name == "index.html":
         gallery=response_data["website"]["indexPage"]["gallery"],
         footer=response_data["website"]["contactPage"]["footer"]
     )
-elif template_file_name == "menu.html":
+elif template_file == "menu.html":
     # Data for menu.html
+    # Pass the entire website object to the template
     rendered_html = template.render(website=response_data["website"])
-elif template_file_name == "aboutUs.html":
-    # Data for about.html
-    rendered_html = template.render(aboutPage=response_data["website"]["aboutPage"])
-elif template_file_name == "contact.html":
-    # Data for contact.html
-    rendered_html = template.render(contactPage=response_data["website"]["contactPage"])
 else:
-    print(f"Error: Unsupported template file '{template_file_name}'.")
+    print(f"Error: Unsupported template file '{template_file}'.")
     sys.exit(1)
 
-# Save the rendered HTML to a new file with UTF-8 encoding
-output_file = f"rendered_{template_file_name}"
+# Save the rendered HTML to a new file
+output_file = f"rendered_{template_file}"
 with open(output_file, "w", encoding="utf-8") as file:
     file.write(rendered_html)
 
-# Force the console to use UTF-8 encoding
-sys.stdout.reconfigure(encoding='utf-8')
-
-# Print the rendered HTML to the console
-print(rendered_html)
-
-# Print a success message
-# print(f"HTML file generated successfully: {output_file}")
+print(f"HTML file generated successfully: {output_file}")

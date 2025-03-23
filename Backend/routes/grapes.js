@@ -54,7 +54,8 @@ router.post('/', async (req, res) => {
       console.log('PageContent:', pageContent);
       console.log('Page Name:', pageName);
 
-      const tempHtmlFilePath = path.join(__dirname, '..', 'temp.html');
+      // Use the pageName to create the file path
+      const tempHtmlFilePath = path.join(__dirname, '..', `${pageName}.html`);
       fs.writeFileSync(tempHtmlFilePath, pageContent.htmlContent);
       console.log('HTML content saved to:', tempHtmlFilePath);
 
@@ -62,7 +63,7 @@ router.post('/', async (req, res) => {
       console.log('Python script path:', pythonScriptPath);
 
       // Spawn the Python script and pass the file path as an argument
-      const pythonProcess = spawn('python', [pythonScriptPath, tempHtmlFilePath]);
+      const pythonProcess = spawn('python', [pythonScriptPath, `${pageName}.html`]);
 
       let renderedHtml = '';
       pythonProcess.stdout.on('data', (data) => {
