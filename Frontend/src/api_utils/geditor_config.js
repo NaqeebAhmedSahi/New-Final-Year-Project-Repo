@@ -34,9 +34,24 @@ console.log("Render Count", renderCount);
  */
 const fetchPageContent = async (websiteId, pageId) => {
   try {
-    const response = await axios.post("http://localhost:8080/api/status", {
-      websiteId,
-      pageId,
+    // Get user project data from localStorage
+    const userProject = JSON.parse(localStorage.getItem('userProject'));
+    console.log("User Project",userProject.customPrompt);
+
+    
+    const formData = new FormData();
+    formData.append('prompt', userProject.customPrompt);
+    formData.append('template_file', 'index.html');
+    formData.append('pageId', pageId);
+    formData.append('websiteId', websiteId);
+
+
+    console.log(pageId);
+
+    const response = await axios.post('http://localhost:8080/api/status/api/chat', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     });
 
     console.log("API Response:", response.data);  // Log the full response for debugging
@@ -54,7 +69,7 @@ const fetchPageContent = async (websiteId, pageId) => {
 
     // Use the page name and fetch content based on the name
     const pageContent = content; // Get the content by page name
-    console.log("Page Content",pageContent);
+    console.log("Page Content", pageContent);
 
     if (!pageContent) {
       return { htmlContent: "", cssContent: "", message: "No content found" };

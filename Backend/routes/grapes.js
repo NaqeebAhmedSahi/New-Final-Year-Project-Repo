@@ -2,100 +2,210 @@ import express from 'express';
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
-import Pages from '../page/page.modal'; // Replace with the correct path to your Page schema
-import Websites from '../models/Template'; // Replace with the correct path to your Website schema
+import Pages from '../page/page.modal';
+import Websites from '../models/Template';
+import multer from 'multer';
 
 const router = express.Router();
+const upload = multer();
+const promptFilePath = path.join(__dirname, '..', 'prompt.json');
+const logFilePath = path.join(__dirname, '..', 'grape-debug.log');
 
-router.post('/', async (req, res) => {
-  const { websiteId, pageId } = req.body;
-  console.log('Received request with websiteId:', websiteId, 'and pageId:', pageId);
+function logToFile(message) {
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] ${message}\n`;
+  fs.appendFileSync(logFilePath, logMessage);
+  console.log(message);
+}
+
+router.post('/grape', async (req, res) => {
+  const { websiteId, pageId, projectData } = req.body;
+
+  logToFile('\n=== NEW REQUEST ===');
+  logToFile(`websiteId: ${websiteId}`);
+  logToFile(`pageId: ${pageId}`);
+  logToFile(`projectData: ${JSON.stringify(projectData, null, 2)}`);
 
   try {
-    // Find the page in the database by pageId
     const page = await Pages.findOne({ _id: pageId });
-    console.log('Page fetched from database:', page);
-
     if (!page) {
-      console.log('Page not found with ID:', pageId);
+      logToFile(`ERROR: Page not found with ID: ${pageId}`);
       return res.status(404).json({ message: 'Page not found' });
     }
 
-    // Check if the page is 'new'
-    if (page.status === 'new') {
-      console.log('Page status is new');
-      return res.json({ status: 'new' });
+    // Extract prompt from projectData
+    const prompt = projectData && projectData.customPrompt ? projectData.customPrompt : '';
+    console.log("Prompt ", prompt);
+    console.log("Project Data ", projectData);
+
+    if (!prompt && projectData) {
+      logToFile('WARNING: No prompt provided in projectData');
     }
 
-    // If the page is 'existing', fetch the website content
-    if (page.status === 'existing') {
-      console.log('Page status is existing, fetching website content');
-      const website = await Websites.findOne({ _id: websiteId });
+    if (projectData) {
+      const promptData = {
+        projectType: projectData.projectType || '',
+        customPrompt: projectData.customPrompt || '',
+        prompt: prompt
+      };
+      fs.writeFileSync(promptFilePath, JSON.stringify(promptData, null, 2), 'utf-8');
+      logToFile('Saved projectData to prompt.json');
+    }
 
-      page.status = 'new'; // Update status to 'new'
-      await page.save();
-      console.log(`Page status updated to 'new' for page ID: ${pageId}`);
+    if (page.status === 'new') {
+      logToFile('Page status is new - returning basic response');
+      return res.json({ status: 'new' });
+    } else if (page.status === 'existing') {
+      logToFile('Page status is existing - processing with Python script');
 
-      if (!website) {
-        console.log('Website not found with ID:', websiteId);
-        return res.status(404).json({ message: 'Website not found' });
-      }
+      // Path to your Python middleware
+      const pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'chatbot.py');
 
-      console.log('Website content fetched:', website.content);
+      // Spawn Python process with both prompt and template file as arguments
+      const pythonProcess = spawn('python', [pythonScriptPath, 'clothing store', 'index.html']);
 
-      const content = website.content;
-      const pageName = page.name;
+      let responseData = '';
 
-      if (!content || !content.has(pageName)) {
-        return res.status(404).json({ message: `Content not found for page: ${pageName}` });
-      }
-
-      const pageContent = content.get(pageName);
-      console.log('PageContent:', pageContent);
-      console.log('Page Name:', pageName);
-
-      // Use the pageName to create the file path
-      const tempHtmlFilePath = path.join(__dirname, '..', `${pageName}.html`);
-      fs.writeFileSync(tempHtmlFilePath, pageContent.htmlContent);
-      console.log('HTML content saved to:', tempHtmlFilePath);
-
-      const pythonScriptPath = path.join(__dirname, '..', 'render_template.py');
-      console.log('Python script path:', pythonScriptPath);
-
-      // Spawn the Python script and pass the file path as an argument
-      const pythonProcess = spawn('python', [pythonScriptPath, `${pageName}.html`]);
-
-      let renderedHtml = '';
       pythonProcess.stdout.on('data', (data) => {
-        renderedHtml += data.toString();
+        responseData += data.toString();
       });
 
       pythonProcess.stderr.on('data', (data) => {
-        console.error(`Python script stderr: ${data}`);
+        console.error(`Python error: ${data}`);
       });
 
-      pythonProcess.on('close', async (code) => {
-        console.log(`Python script exited with code ${code}`);
-        console.log('Final Rendered Output:', renderedHtml);
+      pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+          return res.status(500).json({ error: 'Failed to get response from chatbot' });
+        }
 
-        // Update pageContent with rendered HTML
-        pageContent.htmlContent = renderedHtml;
-
-        // Send the updated pageContent to the frontend
-        return res.json({
-          status: 'existing',
-          name: pageName,
-          content: pageContent, // Updated page content
-        });
+        try {
+          const parsedData = JSON.parse(responseData);
+          res.json(parsedData);
+        } catch (e) {
+          res.status(500).json({ error: 'Invalid response from chatbot' });
+        }
       });
-    } else {
-      console.log('Unexpected page status:', page.status);
-      res.status(400).json({ message: 'Invalid page status' });
     }
+
   } catch (error) {
-    console.error('Error fetching page status or website content:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    logToFile(`TOP LEVEL ERROR: ${error.stack || error}`);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: error.message
+    });
   }
 });
 
+router.post('/api/chat', upload.none(), async (req, res) => {
+  try {
+    const { prompt, template_file, pageId, websiteId } = req.body;
+
+    if (!prompt || !template_file) {
+      return res.status(400).json({ error: 'Prompt and template file are required' });
+    }
+
+    const page = await Pages.findOne({ _id: pageId });
+    if (!page) {
+      logToFile(`ERROR: Page not found with ID: ${pageId}`);
+      return res.status(404).json({ message: 'Page not found' });
+    }
+
+    const website = await Websites.findOne({ _id: websiteId });
+    if (!website) {
+      console.log('Website not found with ID:', websiteId);
+      return res.status(404).json({ message: 'Website not found' });
+    }
+
+    const content = website.content;
+    const pageName = page.name;
+    const pageContent = content.get(pageName);
+
+    // Configure paths
+    const pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'chatbot.py');
+    const outputDir = path.join(__dirname, '..', 'rendered_templates');
+    const outputFilePath = path.join(outputDir, `rendered_${pageName}.html`);
+
+    // Ensure directory exists
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    // Execute Python script with error handling
+    const pythonProcess = spawn('python', [pythonScriptPath, prompt, pageName, pageName]);
+    
+    let pythonOutput = '';
+    let pythonError = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      pythonOutput += data.toString();
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      pythonError += data.toString();
+    });
+
+    pythonProcess.on('close', async (code) => {
+      try {
+        // Parse the Python script output
+        let result;
+        try {
+          result = JSON.parse(pythonOutput);
+        } catch (parseError) {
+          console.error('Failed to parse Python output:', pythonOutput);
+          throw new Error(`Python output parse error: ${parseError.message}`);
+        }
+
+        // Handle Python script errors
+        if (code !== 0 || pythonError || result.error) {
+          const errorDetails = {
+            exitCode: code,
+            stderr: pythonError,
+            pythonOutput: result.error || pythonOutput
+          };
+          console.error('Python script failed:', errorDetails);
+          return res.status(500).json({
+            error: 'Python script execution failed',
+            details: errorDetails
+          });
+        }
+
+        // Verify the output file was created
+        if (!fs.existsSync(outputFilePath)) {
+          console.error('Expected file not found:', outputFilePath);
+          return res.status(500).json({
+            error: 'Generated HTML file not found',
+            details: `Python script did not create ${outputFilePath}`
+          });
+        }
+
+        const renderedHtml = fs.readFileSync(outputFilePath, 'utf-8');
+        pageContent.htmlContent = renderedHtml;
+
+        return res.json({
+          status: 'success',
+          name: pageName,
+          content: pageContent,
+          pythonOutput: result // Include full Python output for debugging
+        });
+
+      } catch (error) {
+        console.error('Post-processing error:', error);
+        res.status(500).json({
+          error: 'Failed to process Python script output',
+          details: error.message,
+          pythonError: pythonError,
+          pythonOutput: pythonOutput
+        });
+      }
+    });
+
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error.message
+    });
+  }
+});
 export default router;

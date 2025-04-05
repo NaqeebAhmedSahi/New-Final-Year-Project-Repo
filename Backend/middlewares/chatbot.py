@@ -19,26 +19,36 @@ def get_chatbot_response(prompt):
         if response.status_code == 200:
             return response.json()
         else:
-            return {"error": "Failed to get response from chatbot"}
+            return {"error": f"Chatbot API failed with status {response.status_code}"}
     
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": f"Chatbot API connection error: {str(e)}"}
 
-def render_template(template_file, response_data):
+def render_template(template_file, response_data, page_name):
     try:
         # Create output directory if it doesn't exist
         output_dir = "rendered_templates"
         os.makedirs(output_dir, exist_ok=True)
+
+        # Construct proper template path
+        template_dir = os.path.join(os.path.dirname(__file__), "templates")
+        template_path = os.path.join(template_dir, template_file)
         
-        # Load the Jinja2 template
-        with open(f"templates/{template_file}", "r", encoding="utf-8") as file:
+        if not os.path.exists(template_path):
+            return {"error": f"Template file not found at {template_path}"}
+
+        # Load the template
+        with open(template_path, "r", encoding="utf-8") as file:
             template_content = file.read()
 
-        # Create a Jinja2 template object
+        # Process the response data
+        if 'response' not in response_data:
+            return {"error": "Invalid response format from chatbot API"}
+            
         response_data = response_data['response']
         template = Template(template_content)
 
-        # Extract data based on the template file name
+        # Template-specific rendering logic
         if template_file == "index.html":
             rendered_html = template.render(
                 title=response_data["website"]["title"],
@@ -61,42 +71,52 @@ def render_template(template_file, response_data):
         elif template_file == "contact.html":
             rendered_html = template.render(contactPage=response_data["website"]["contactPage"])
         else:
-            return {"error": f"Unsupported template file '{template_file}'."}
+            return {"error": f"Unsupported template file '{template_file}'"}
 
-        # Generate timestamp for unique filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_filename = f"{output_dir}/rendered_{timestamp}_{template_file}"
+        # Save the rendered output
+        output_filename = f"rendered_{page_name}.html"
+        output_path = os.path.join(output_dir, output_filename)
         
-        # Save the rendered HTML to file
-        with open(output_filename, "w", encoding="utf-8") as file:
+        with open(output_path, "w", encoding="utf-8") as file:
             file.write(rendered_html)
         
         return {
-            "original_response": response_data,
-            "rendered_html": rendered_html,
-            "template_used": template_file,
-            "saved_file": output_filename,
-            "file_path": os.path.abspath(output_filename)
+            "status": "success",
+            "output_file": output_path,
+            "template_used": template_file
         }
 
     except Exception as e:
         return {"error": f"Template rendering error: {str(e)}"}
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print(json.dumps({"error": "Prompt and template file are required"}))
+    try:
+        if len(sys.argv) < 4:
+            result = {"error": "Prompt, template file and page name are required"}
+            print(json.dumps(result))
+            sys.exit(1)
+        
+        prompt = sys.argv[1]
+        template_file = sys.argv[2]
+        page_name = sys.argv[3]
+        
+        # Get response from chatbot
+        response_data = get_chatbot_response(prompt)
+        
+        if "error" in response_data:
+            print(json.dumps(response_data))
+            sys.exit(1)
+        
+        # Render template with the response data
+        result = render_template(template_file, response_data, page_name)
+        
+        # Print the result (Node.js will capture this)
+        print(json.dumps(result, indent=2))
+        
+        # Exit with proper status code
+        sys.exit(0 if "error" not in result else 1)
+
+    except Exception as e:
+        error_result = {"error": f"Unexpected error: {str(e)}"}
+        print(json.dumps(error_result))
         sys.exit(1)
-    
-    prompt = sys.argv[1]
-    template_file = sys.argv[2]
-    
-    # Get response from chatbot
-    response_data = get_chatbot_response(prompt)
-    
-    if "error" in response_data:
-        print(json.dumps(response_data))
-        sys.exit(1)
-    
-    # Render template with the response data
-    result = render_template(template_file, response_data)
-    print(json.dumps(result, indent=2))
