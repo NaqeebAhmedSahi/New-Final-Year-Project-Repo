@@ -13,6 +13,8 @@ const WebsiteList = () => {
   const [selectedPage, setSelectedPage] = useState(null);
 
   const userId = localStorage.getItem('userId');
+  const projectType = JSON.parse(localStorage.getItem('userProject'))?.projectType;
+  console.log("User Id", userId, "Project Type:", projectType);
   console.log("User Id", userId);
 
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ const WebsiteList = () => {
   useEffect(() => {
     const fetchWebsites = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/templates');
+        const response = await axios.get(`http://localhost:8080/api/templates?type=${projectType}`);
         setWebsites(response.data);
         setLoading(false);
       } catch (err) {
@@ -29,8 +31,13 @@ const WebsiteList = () => {
       }
     };
 
-    fetchWebsites();
-  }, []);
+    if (projectType) {
+      fetchWebsites();
+    } else {
+      setError('No project type selected');
+      setLoading(false);
+    }
+  }, [projectType]);
 
   const handleChoose = async (websiteId) => {
     try {

@@ -7,7 +7,11 @@ from datetime import datetime
 
 def get_chatbot_response(prompt):
     try:
-        payload = {"prompt": prompt}
+        project_type = "ecommerce"
+        payload = {
+            "prompt": prompt,
+            "type": project_type  # Add project type to payload
+        }
         headers = {'Content-Type': 'application/json'}
         
         response = requests.post(
@@ -48,8 +52,14 @@ def render_template(template_file, response_data, page_name):
         response_data = response_data['response']
         template = Template(template_content)
 
-        # Template-specific rendering logic
+            # Template-specific rendering logic
         if template_file == "index.html":
+            # Handle both cases for categories data
+            categories_data = (
+                response_data["website"]["indexPage"].get("collections", {}).get("categories") or 
+                response_data["website"]["indexPage"].get("specials", {}).get("menu_items")
+            )
+            
             rendered_html = template.render(
                 title=response_data["website"]["title"],
                 stylesheets=response_data["website"]["stylesheets"],
@@ -57,7 +67,7 @@ def render_template(template_file, response_data, page_name):
                 carousel=response_data["website"]["indexPage"]["carousel"],
                 specials={
                     "title": "Shop by Category",
-                    "menu_items": response_data["website"]["indexPage"]["collections"]["categories"]
+                    "menu_items": categories_data
                 },
                 highlights=response_data["website"]["indexPage"]["highlights"],
                 testimonials=response_data["website"]["indexPage"]["testimonials"],

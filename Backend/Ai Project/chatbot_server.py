@@ -7,31 +7,79 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 from autocorrect import Speller
 import tensorflow as tf
-from waitress import serve  # Production-ready WSGI server
+from waitress import serve
+import os
 
-# Initialize Flask app
 app = Flask(__name__)
 
 # Download NLTK data
 nltk.download('punkt')
 nltk.download('wordnet')
 
-# Load preprocessing files and model
+# Initialize components
 lemmatizer = WordNetLemmatizer()
 spell = Speller(lang='en')
-words = pickle.load(open('words.pkl', 'rb'))
-classes = pickle.load(open('classes.pkl', 'rb'))
-model = tf.keras.models.load_model('chatbot_model1.keras')
 
-# Load intents data
-with open("1.json", encoding='utf-8') as file:
-    intents = json.load(file)
+# File paths configuration
+PROJECT_CONFIG = {
+    'ecommerce': {
+        'words_path': './EcommerceEssense/words.pkl',
+        'classes_path': './EcommerceEssense/classes.pkl',
+        'model_path': './EcommerceEssense/chatbot_model1.keras',
+        'intents_path': './Datasets/eCommerce.json'
+    },
+    'blog': {
+        'words_path': './BlogEssense/words.pkl',
+        'classes_path': './BlogEssense/classes.pkl',
+        'model_path': './BlogEssense/chatbot_model1.keras',
+        'intents_path': './Datasets/blog.json'
+    },
+    'portfolio': {
+        'words_path': './PortfolioEssense/words.pkl',
+        'classes_path': './PortfolioEssense/classes.pkl',
+        'model_path': './PortfolioEssense/chatbot_model1.keras',
+        'intents_path': './Datasets/portfolio.json'
+    }
+}
+
+# Global variables to hold loaded resources
+words = None
+classes = None
+model = None
+intents = None
+current_type = None
+
+def load_resources(project_type):
+    """Load the appropriate NLP resources based on project type"""
+    global words, classes, model, intents, current_type
+    
+    if project_type == current_type:
+        return  # Already loaded
+    
+    config = PROJECT_CONFIG.get(project_type)
+    if not config:
+        raise ValueError(f"Unsupported project type: {project_type}")
+    
+    # Verify files exist
+    for path in config.values():
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"Resource file not found: {path}")
+    
+    # Load new resources
+    words = pickle.load(open(config['words_path'], 'rb'))
+    classes = pickle.load(open(config['classes_path'], 'rb'))
+    model = tf.keras.models.load_model(config['model_path'])
+    
+    with open(config['intents_path'], encoding='utf-8') as file:
+        intents = json.load(file)
+    
+    current_type = project_type
+    print(f"Loaded resources for project type: {project_type}")
 
 def clean_up_sentence(sentence):
     corrected_sentence = spell(sentence)
     sentence_words = nltk.word_tokenize(corrected_sentence)
-    base_words = [lemmatizer.lemmatize(word.lower()) for word in sentence_words]
-    return base_words
+    return [lemmatizer.lemmatize(word.lower()) for word in sentence_words]
 
 def bow(sentence, words):
     sentence_words = clean_up_sentence(sentence)
@@ -48,40 +96,57 @@ def predict_intent(sentence):
     ERROR_THRESHOLD = 0.25
     results = [[i, r] for i, r in enumerate(res) if r > ERROR_THRESHOLD]
     results.sort(key=lambda x: x[1], reverse=True)
-    return_list = []
-    for r in results:
-        return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
-    return return_list
+    return [{"intent": classes[r[0]], "probability": str(r[1])} for r in results]
 
 def get_response(intents_list, intents_json):
     tag = intents_list[0]['intent']
-    list_of_intents = intents_json['intents']
-    for i in list_of_intents:
-        if i['tag'] == tag:
-            result = random.choice(i['response'])
-            break
-    return result
+    for intent in intents_json['intents']:
+        if intent['tag'] == tag:
+            return random.choice(intent['response'])
+    return "I didn't understand that. Could you rephrase?"
 
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json()
     prompt = data.get('prompt', '')
+    project_type = data.get('type', 'blog')  # Default to blog if not specified
     
     if not prompt:
         return jsonify({'error': 'No prompt provided'}), 400
     
-    intents_list = predict_intent(prompt)
-    response = get_response(intents_list, intents)
-    
-    return jsonify({
-        'response': response,
-        'detected_intent': intents_list[0]['intent'],
-        'confidence': intents_list[0]['probability']
-    })
+    try:
+        # Load appropriate resources
+        load_resources(project_type)
+        
+        # Process the request
+        intents_list = predict_intent(prompt)
+        response = get_response(intents_list, intents)
+        
+        # Debug output
+        print("\n=== REQUEST PROCESSING ===")
+        print(f"Project Type: {project_type}")
+        print(f"User Prompt: {prompt}")
+        print(f"Detected Intent: {intents_list[0]['intent']}")
+        print(f"Confidence: {intents_list[0]['probability']}")
+        print(f"Response: {response}")
+        print("=========================\n")
+        
+        return jsonify({
+            'response': response,
+            'detected_intent': intents_list[0]['intent'],
+            'confidence': intents_list[0]['probability'],
+            'project_type': project_type
+        })
+        
+    except Exception as e:
+        print(f"Error processing request: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    # For production use waitress (pip install waitress)
-    serve(app, host="0.0.0.0", port=5001)
+    # Pre-load default resources (blog)
+    try:
+        load_resources('blog')
+    except Exception as e:
+        print(f"Initial resource loading failed: {e}")
     
-    # For development you can use:
-    # app.run(host='0.0.0.0', port=5000)
+    serve(app, host="0.0.0.0", port=5001)

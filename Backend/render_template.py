@@ -40,32 +40,53 @@ def render_template(template_file, response_data):
 
         # Extract data based on the template file name
         if template_file == "index.html":
+            # Handle both 'collections' and 'specials' cases
+            index_page = response_data["website"]["indexPage"]
+            
+            # Determine which key exists for the specials/collections section
+            if "collections" in index_page:
+                section_data = index_page["collections"]
+                section_title = section_data.get("title", "Shop by Category")
+                # Handle both 'categories' and 'menu_items'
+                items = section_data.get("categories", section_data.get("menu_items", []))
+            elif "specials" in index_page:
+                section_data = index_page["specials"]
+                section_title = section_data.get("title", "Special Offers")
+                items = section_data.get("menu_items", section_data.get("categories", []))
+            else:
+                section_title = "Featured Items"
+                items = []
+            
             rendered_html = template.render(
                 title=response_data["website"]["title"],
                 stylesheets=response_data["website"]["stylesheets"],
                 navbar=response_data["website"]["navbar"],
                 carousel=response_data["website"]["indexPage"]["carousel"],
                 specials={
-                    "title": "Shop by Category",
-                    "menu_items": response_data["website"]["indexPage"]["collections"]["categories"]
+                    "title": section_title,
+                    "menu_items": items
                 },
-                highlights=response_data["website"]["indexPage"]["highlights"],
-                testimonials=response_data["website"]["indexPage"]["testimonials"],
-                gallery=response_data["website"]["indexPage"]["gallery"],
+                highlights=response_data["website"]["indexPage"].get("highlights", []),
+                testimonials=response_data["website"]["indexPage"].get("testimonials", []),
+                gallery=response_data["website"]["indexPage"].get("gallery", []),
                 footer=response_data["website"]["contactPage"]["footer"]
             )
-        elif template_file == "menu.html":
+        
+        elif template_file == "shop.html":
             rendered_html = template.render(website=response_data["website"])
+        
         elif template_file == "aboutUs.html":
             rendered_html = template.render(aboutPage=response_data["website"]["aboutPage"])
+        
         elif template_file == "contact.html":
             rendered_html = template.render(contactPage=response_data["website"]["contactPage"])
+        
         else:
             return {"error": f"Unsupported template file '{template_file}'."}
 
         # Generate timestamp for unique filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_filename = f"{output_dir}/rendered_{timestamp}_{template_file}"
+        output_filename = f"{output_dir}/rendered_{template_file}"
         
         # Save the rendered HTML to file
         with open(output_filename, "w", encoding="utf-8") as file:

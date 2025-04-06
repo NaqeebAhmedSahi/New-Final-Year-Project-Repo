@@ -8,6 +8,7 @@ import AdminHeader from './AdminHeader';
 
 const ManageTemplates = () => {
   const [websiteName, setWebsiteName] = useState('');
+  const [websiteType, setWebsiteType] = useState('ecommerce'); 
   const [websites, setWebsites] = useState([]);
   const navigate = useNavigate();
 
@@ -24,17 +25,21 @@ const ManageTemplates = () => {
   // Add a new website
   const addWebsite = (event) => {
     event.preventDefault();
-    axios.post('http://localhost:8080/api/templates', { name: websiteName })
+    axios.post('http://localhost:8080/api/templates', { 
+      name: websiteName,
+      type: websiteType 
+    })
       .then((response) => {
         toast.success(`Website "${websiteName}" added successfully!`);
         setWebsiteName('');
-        setWebsites([...websites, response.data]); // Add the new website to the list
+        setWebsites([...websites, response.data]);
       })
       .catch((error) => {
         console.error('Error adding website:', error);
         toast.error('Failed to add website. Please try again.');
       });
   };
+
 
   // Delete a website
   const deleteWebsite = (websiteId) => {
@@ -55,7 +60,7 @@ const ManageTemplates = () => {
       <div className="container mt-4 mb-5 p-4 rounded shadow-sm bg-white">
         <h2 className="text-center mb-4 text-primary">Manage Website Templates</h2>
 
-        {/* Form to add a new website */}
+        {/* Updated form with type selection */}
         <form onSubmit={addWebsite} className="mb-4">
           <div className="form-group">
             <label htmlFor="websiteName" className="font-weight-bold">Website Name:</label>
@@ -69,16 +74,31 @@ const ManageTemplates = () => {
               required
             />
           </div>
-          <button type="submit" className="btn btn-success btn-block">Add Website</button>
+          <div className="form-group mt-3">
+            <label htmlFor="websiteType" className="font-weight-bold">Website Type:</label>
+            <select
+              className="form-control border-primary"
+              id="websiteType"
+              value={websiteType}
+              onChange={(e) => setWebsiteType(e.target.value)}
+              required
+            >
+              <option value="ecommerce">E-commerce</option>
+              <option value="blog">Blog</option>
+              <option value="portfolio">Portfolio</option>
+            </select>
+          </div>
+          <button type="submit" className="btn btn-success btn-block mt-3">Add Website</button>
         </form>
 
-        {/* Table displaying existing websites */}
+        {/* Updated table to show type */}
         <h3 className="mb-3 text-secondary">Existing Websites:</h3>
         <div className="table-responsive">
           <table className="table table-hover table-bordered">
             <thead className="thead-dark">
               <tr>
                 <th>Website Name</th>
+                <th>Type</th>
                 <th className="text-center">Actions</th>
               </tr>
             </thead>
@@ -86,6 +106,7 @@ const ManageTemplates = () => {
               {websites.map((website) => (
                 <tr key={website._id}>
                   <td className="align-middle">{website.name}</td>
+                  <td className="align-middle text-capitalize">{website.type}</td>
                   <td className="text-center align-middle">
                     <button
                       className="btn btn-danger btn-sm mr-2"

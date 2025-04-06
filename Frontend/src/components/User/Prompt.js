@@ -1,4 +1,3 @@
-// src/components/Prompt.js
 import React, { useState } from 'react';
 import '../../styles/User/prompt.css';
 import "../../styles/User/loginPage.css";
@@ -10,8 +9,15 @@ const Prompt = () => {
   const [selectedProject, setSelectedProject] = useState('');
   const [customPrompt, setCustomPrompt] = useState('');
 
+  // Define project types with their corresponding values
+  const projectTypes = {
+    prompt1: 'ecommerce',
+    prompt2: 'blog',
+    prompt3: 'portfolio'
+  };
+
   const handleProjectSelect = (e) => {
-    setSelectedProject(e.target.id);
+    setSelectedProject(projectTypes[e.target.id]);
   };
 
   const handlePromptChange = (e) => {
@@ -19,10 +25,15 @@ const Prompt = () => {
   };
 
   const handleSubmit = () => {
+    if (!selectedProject) {
+      alert('Please select a project type');
+      return;
+    }
+
     // Get the description of the selected project
     let projectDescription = '';
     if (selectedProject) {
-      const selectedLabel = document.querySelector(`label[for="${selectedProject}"]`);
+      const selectedLabel = document.querySelector(`label[for="${Object.keys(projectTypes).find(key => projectTypes[key] === selectedProject)}"]`);
       if (selectedLabel) {
         projectDescription = selectedLabel.textContent.trim();
       }
@@ -30,7 +41,7 @@ const Prompt = () => {
 
     // Prepare data to store
     const projectData = {
-      projectType: selectedProject,
+      projectType: selectedProject, // This will be 'ecommerce', 'blog', or 'portfolio'
       projectDescription: projectDescription,
       customPrompt: customPrompt,
       timestamp: new Date().toISOString()
@@ -61,6 +72,7 @@ const Prompt = () => {
                 name="prompt" 
                 className="radio-box" 
                 onChange={handleProjectSelect}
+                checked={selectedProject === 'ecommerce'}
               />
               <label htmlFor="prompt1" className="radio-label">
                 <strong>E-commerce Builder</strong>
@@ -76,6 +88,7 @@ const Prompt = () => {
                 name="prompt" 
                 className="radio-box" 
                 onChange={handleProjectSelect}
+                checked={selectedProject === 'blog'}
               />
               <label htmlFor="prompt2" className="radio-label">
                 <strong>Blog Builder</strong>
@@ -91,6 +104,7 @@ const Prompt = () => {
                 name="prompt" 
                 className="radio-box" 
                 onChange={handleProjectSelect}
+                checked={selectedProject === 'portfolio'}
               />
               <label htmlFor="prompt3" className="radio-label">
                 <strong>Portfolio Builder</strong>
@@ -120,7 +134,7 @@ const Prompt = () => {
                     className="btn btn-primary mt-1" 
                     type="button" 
                     id="submit-btn"
-                    disabled={!selectedProject && !customPrompt}
+                    disabled={!selectedProject}
                   >
                     <ion-icon name="send-outline"></ion-icon>
                   </button>

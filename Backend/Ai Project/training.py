@@ -14,7 +14,7 @@ from keras.layers import Dense, Activation, Dropout
 from keras.optimizers import SGD
 
 lemmatizer = WordNetLemmatizer()
-intents = json.loads(open("1.json", encoding='utf-8').read())
+intents = json.loads(open("./Datasets/portfolio.json", encoding='utf-8').read())
 print(json.dumps(intents, indent=4, ensure_ascii=False)) 
 words = []
 classes = []
@@ -39,8 +39,8 @@ words = sorted(set(words))
 
 classes = sorted(set(classes))
 
-pickle.dump(words, open('words.pkl', 'wb'))
-pickle.dump(classes, open('classes.pkl', 'wb'))
+pickle.dump(words, open('./PortfolioEssense/words.pkl', 'wb'))
+pickle.dump(classes, open('./PortfolioEssense/classes.pkl', 'wb'))
 
 # Split the data into training and validation sets
 train_documents, val_documents = train_test_split(documents, test_size=0.1, random_state=42)
@@ -89,7 +89,7 @@ sgd = tf.keras.optimizers.SGD(learning_rate=0.01, decay=1e-6, momentum=0.9, nest
 
 model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
-hist = model.fit(train_X, train_Y, epochs=200, batch_size=5, verbose=1, validation_data=(val_X, val_Y))  # Add validation_data
+hist = model.fit(train_X, train_Y, epochs=40, batch_size=5, verbose=1, validation_data=(val_X, val_Y))  # Add validation_data
 
-model.save('chatbot_model1.keras')
+model.save('./PortfolioEssense/chatbot_model1.keras')
 print("done")

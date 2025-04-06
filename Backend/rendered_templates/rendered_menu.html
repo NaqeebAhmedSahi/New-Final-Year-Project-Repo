@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clothing Store</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop</title>
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Montserrat:wght@400;600&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
     
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;600&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
     
-    <link rel="stylesheet" href="./style.css">
+    <link href="./style.css" rel="stylesheet" />
     
-    <link rel="stylesheet" href="./catalog.css">
+    <link href="./catalog.css" rel="stylesheet" />
     
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="#">ClothingStore</a>
+            <a class="navbar-brand" href="#">FragranceBrand</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -38,6 +37,10 @@
                     </li>
                     
                     <li class="nav-item">
+                        <a class="nav-link" href="./collections.html">Collections</a>
+                    </li>
+                    
+                    <li class="nav-item">
                         <a class="nav-link" href="./aboutUs.html">About Us</a>
                     </li>
                     
@@ -50,15 +53,14 @@
         </div>
     </nav>
 
-    <!-- Carousel -->
     <div id="carouselExample" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
         <div class="carousel-inner">
             
             <div class="carousel-item active">
-                <img src="./clothing1.jpg" class="d-block w-100" alt="Slider 1">
+                <img src="fragrance-carousel" class="d-block w-100" alt="Welcome to Our Fragrance Store">
                 <div class="carousel-caption">
-                    <h2 class="slide-text">Welcome to Our Clothing Store</h2>
-                    <p class="slide-subtext">Discover the latest trends in fashion</p>
+                    <h2 class="slide-text">Welcome to Our Fragrance Store</h2>
+                    <p class="slide-subtext">Discover the latest in fragrances and perfumes</p>
                     <form class="d-flex justify-content-center search-form">
                         <input class="form-control search-input" type="search" placeholder="Search for dishes, locations..." aria-label="Search">
                         <button class="btn btn-custom search-button" type="submit">Search</button>
@@ -67,10 +69,10 @@
             </div>
             
             <div class="carousel-item ">
-                <img src="./clothing2.jpg" class="d-block w-100" alt="Slider 2">
+                <img src="perfumes-carousel" class="d-block w-100" alt="Luxury Perfumes">
                 <div class="carousel-caption">
-                    <h2 class="slide-text">New Arrivals</h2>
-                    <p class="slide-subtext">Shop our exclusive collection</p>
+                    <h2 class="slide-text">Luxury Perfumes</h2>
+                    <p class="slide-subtext">Explore our exclusive collection of perfumes for every occasion</p>
                     <form class="d-flex justify-content-center search-form">
                         <input class="form-control search-input" type="search" placeholder="Search for dishes, locations..." aria-label="Search">
                         <button class="btn btn-custom search-button" type="submit">Search</button>
@@ -79,10 +81,10 @@
             </div>
             
             <div class="carousel-item ">
-                <img src="./clothing3.jpg" class="d-block w-100" alt="Slider 3">
+                <img src="colognes-carousel" class="d-block w-100" alt="Shop the Latest Colognes">
                 <div class="carousel-caption">
-                    <h2 class="slide-text">Seasonal Styles</h2>
-                    <p class="slide-subtext">Find the perfect outfit for every occasion</p>
+                    <h2 class="slide-text">Shop the Latest Colognes</h2>
+                    <p class="slide-subtext">Find your perfect scent with our curated selection</p>
                     <form class="d-flex justify-content-center search-form">
                         <input class="form-control search-input" type="search" placeholder="Search for dishes, locations..." aria-label="Search">
                         <button class="btn btn-custom search-button" type="submit">Search</button>
@@ -93,204 +95,155 @@
         </div>
     </div>
 
-    <!-- Specials Section -->
-    <div class="specials-section container py-5 my-5">
-        <h2 class="section-title text-center mb-5">Shop by Category</h2>
-        <div class="specials-carousel">
-            <button class="carousel-control prev" onclick="moveCarousel(-1)">&#10094;</button>
-            <div class="specials-wrapper">
-                <div class="specials-items">
+    <section class="menu">
+        <div class="container">
+            <h2 class="section-title">Shop</h2>
+
+            
+            <div class="menu-category perfumes">
+                <h3 class="category-title">Perfumes</h3>
+                <div class="menu-items">
                     
-                    <div class="special-card">
-                        <img src="./men.jpg" alt="Men's Clothing" class="special-image">
-                        <div class="special-content">
-                            <h3 class="special-title">Men's Clothing</h3>
-                            <p class="special-description">Explore our collection of men's fashion, from casual wear to formal attire.</p>
-                            <p class="special-price"></p>
+                    <div class="menu-item">
+                        <img src="perfume-1" alt="Floral Perfume" class="menu-image">
+                        <div class="menu-details">
+                            <h3 class="menu-title">Floral Perfume</h3>
+                            <p class="menu-description">A luxurious floral perfume with a delicate and feminine scent.</p>
+                            <span class="menu-price">$99.99</span>
+                            <a href="./order.html" class="btn-custom read-more">Order Now</a>
                         </div>
                     </div>
                     
-                    <div class="special-card">
-                        <img src="./women.jpg" alt="Women's Clothing" class="special-image">
-                        <div class="special-content">
-                            <h3 class="special-title">Women's Clothing</h3>
-                            <p class="special-description">Discover stylish outfits for women, perfect for any occasion.</p>
-                            <p class="special-price"></p>
+                    <div class="menu-item">
+                        <img src="perfume-2" alt="Citrus Perfume" class="menu-image">
+                        <div class="menu-details">
+                            <h3 class="menu-title">Citrus Perfume</h3>
+                            <p class="menu-description">A refreshing citrus perfume for a vibrant and energetic vibe.</p>
+                            <span class="menu-price">$89.99</span>
+                            <a href="./order.html" class="btn-custom read-more">Order Now</a>
                         </div>
                     </div>
                     
-                    <div class="special-card">
-                        <img src="./kids.jpg" alt="Kids' Clothing" class="special-image">
-                        <div class="special-content">
-                            <h3 class="special-title">Kids' Clothing</h3>
-                            <p class="special-description">Adorable and comfortable clothing for kids of all ages.</p>
-                            <p class="special-price"></p>
+                    <div class="menu-item">
+                        <img src="perfume-3" alt="Oriental Perfume" class="menu-image">
+                        <div class="menu-details">
+                            <h3 class="menu-title">Oriental Perfume</h3>
+                            <p class="menu-description">An exotic oriental perfume with rich and spicy notes.</p>
+                            <span class="menu-price">$109.99</span>
+                            <a href="./order.html" class="btn-custom read-more">Order Now</a>
                         </div>
                     </div>
                     
                 </div>
             </div>
-            <button class="carousel-control next" onclick="moveCarousel(1)">&#10095;</button>
-        </div>
-    </div>
-
-    <!-- Highlights Section -->
-    <section class="key-highlights">
-        <div class="container">
-            <h2 class="section-title">Why Choose Us</h2>
-            <div class="highlights-wrapper">
-                
-                <div class="highlight-card">
-                    <div class="highlight-icon">
-                        <i class="fas fa-tags"></i>
-                    </div>
-                    <h3 class="highlight-title">Exclusive Deals</h3>
-                    <p class="highlight-description">Enjoy discounts on our latest collections.</p>
-                </div>
-                
-                <div class="highlight-card">
-                    <div class="highlight-icon">
-                        <i class="fas fa-shipping-fast"></i>
-                    </div>
-                    <h3 class="highlight-title">Fast Shipping</h3>
-                    <p class="highlight-description">Get your orders delivered quickly and reliably.</p>
-                </div>
-                
-                <div class="highlight-card">
-                    <div class="highlight-icon">
-                        <i class="fas fa-undo"></i>
-                    </div>
-                    <h3 class="highlight-title">Easy Returns</h3>
-                    <p class="highlight-description">Hassle-free returns within 30 days.</p>
-                </div>
-                
-                <div class="highlight-card">
-                    <div class="highlight-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h3 class="highlight-title">Premium Quality</h3>
-                    <p class="highlight-description">We use only the finest materials for our clothing.</p>
-                </div>
-                
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials">
-        <div class="container">
-            <h2 class="section-title">What Our Customers Say</h2>
-            <div class="testimonials-wrapper">
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <p>I love the quality and style of the clothes! Highly recommend this store.</p>
-                    </div>
-                    <div class="customer-info">
-                        <img src="./anonymous.jpg" alt="John Doe" class="customer-image">
-                        <h3 class="customer-name">John Doe</h3>
-                        <span class="customer-role">Happy Customer</span>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <p>Great selection and fast delivery. Will definitely shop here again!</p>
-                    </div>
-                    <div class="customer-info">
-                        <img src="./anonymous.jpg" alt="Jane Smith" class="customer-image">
-                        <h3 class="customer-name">Jane Smith</h3>
-                        <span class="customer-role">Fashion Enthusiast</span>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <p>Perfect outfits for my kids. They love the designs!</p>
-                    </div>
-                    <div class="customer-info">
-                        <img src="./anonymous.jpg" alt="Emily Johnson" class="customer-image">
-                        <h3 class="customer-name">Emily Johnson</h3>
-                        <span class="customer-role">Parent</span>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-    </section>
-
-    <!-- Gallery Section -->
-    <section class="gallery">
-        <div class="container">
-            <h2 class="section-title">Our Ambiance</h2>
             
-            <div class="gallery-item">
-                
-                <div class="gallery-text">
-                    <h3>Casual Wear</h3>
-                    <div class="underline"></div>
-                    <p>Explore our range of comfortable and stylish casual wear.</p>
-                    <a href="#" class="read-more">Read More</a>
+            <div class="menu-category colognes">
+                <h3 class="category-title">Colognes</h3>
+                <div class="menu-items">
+                    
+                    <div class="menu-item">
+                        <img src="cologne-1" alt="Woody Cologne" class="menu-image">
+                        <div class="menu-details">
+                            <h3 class="menu-title">Woody Cologne</h3>
+                            <p class="menu-description">A bold and masculine cologne with woody undertones.</p>
+                            <span class="menu-price">$89.99</span>
+                            <a href="./order.html" class="btn-custom read-more">Order Now</a>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <img src="cologne-2" alt="Fresh Cologne" class="menu-image">
+                        <div class="menu-details">
+                            <h3 class="menu-title">Fresh Cologne</h3>
+                            <p class="menu-description">A fresh and clean cologne for a crisp and invigorating scent.</p>
+                            <span class="menu-price">$79.99</span>
+                            <a href="./order.html" class="btn-custom read-more">Order Now</a>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <img src="cologne-3" alt="Spicy Cologne" class="menu-image">
+                        <div class="menu-details">
+                            <h3 class="menu-title">Spicy Cologne</h3>
+                            <p class="menu-description">A spicy cologne with warm and intense notes.</p>
+                            <span class="menu-price">$99.99</span>
+                            <a href="./order.html" class="btn-custom read-more">Order Now</a>
+                        </div>
+                    </div>
+                    
                 </div>
-                <img src="./gallery1.jpg" alt="Casual Wear" class="gallery-image">
-                
             </div>
             
-            <div class="gallery-item">
-                
-                <img src="./gallery2.jpg" alt="Formal Attire" class="gallery-image">
-                <div class="gallery-text">
-                    <h3>Formal Attire</h3>
-                    <div class="underline"></div>
-                    <p>Elegant and sophisticated outfits for formal occasions.</p>
-                    <a href="#" class="read-more">Read More</a>
+            <div class="menu-category unisex-fragrances">
+                <h3 class="category-title">Unisex Fragrances</h3>
+                <div class="menu-items">
+                    
+                    <div class="menu-item">
+                        <img src="unisex-1" alt="Unisex Fragrance" class="menu-image">
+                        <div class="menu-details">
+                            <h3 class="menu-title">Unisex Fragrance</h3>
+                            <p class="menu-description">A versatile unisex fragrance for any occasion.</p>
+                            <span class="menu-price">$79.99</span>
+                            <a href="./order.html" class="btn-custom read-more">Order Now</a>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <img src="unisex-2" alt="Elegant Unisex Scent" class="menu-image">
+                        <div class="menu-details">
+                            <h3 class="menu-title">Elegant Unisex Scent</h3>
+                            <p class="menu-description">An elegant unisex fragrance with a sophisticated aroma.</p>
+                            <span class="menu-price">$89.99</span>
+                            <a href="./order.html" class="btn-custom read-more">Order Now</a>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-item">
+                        <img src="unisex-3" alt="Modern Unisex Perfume" class="menu-image">
+                        <div class="menu-details">
+                            <h3 class="menu-title">Modern Unisex Perfume</h3>
+                            <p class="menu-description">A modern unisex perfume with a unique and contemporary scent.</p>
+                            <span class="menu-price">$99.99</span>
+                            <a href="./order.html" class="btn-custom read-more">Order Now</a>
+                        </div>
+                    </div>
+                    
                 </div>
-                
-            </div>
-            
-            <div class="gallery-item">
-                
-                <div class="gallery-text">
-                    <h3>Seasonal Collections</h3>
-                    <div class="underline"></div>
-                    <p>Stay trendy with our seasonal fashion lines.</p>
-                    <a href="#" class="read-more">Read More</a>
-                </div>
-                <img src="./gallery3.jpg" alt="Seasonal Collections" class="gallery-image">
-                
             </div>
             
         </div>
     </section>
 
-    <!-- Footer -->
     <header class="header">
         <div class="container">
             <div class="nav-section">
                 <div class="logo">
-                    <img src="./logo.jpg" alt="Restaurant Logo" class="logo-image">
-                    <span class="logo-text">ClothingStore</span>
+                    <img src="logo" alt="Restaurant Logo" class="logo-image">
+                    <span class="logo-text">FragranceBrand</span>
                 </div>
                 <table class="nav-table">
                     <tbody>
+                        
                         <tr>
-                            
                             <td><a href="#home">Home</a></td>
-                            
-                            
-                            <td><a href="#shop">Shop</a></td>
-                            
                         </tr>
+                        
                         <tr>
-                            
-                            
-                            <td><a href="#about">About Us</a></td>
-                            
-                            
-                            <td><a href="#contact">Contact</a></td>
-                            
-                            
+                            <td><a href="#shop">Shop</a></td>
                         </tr>
+                        
+                        <tr>
+                            <td><a href="#collections">Collections</a></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="#about">About Us</a></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><a href="#contact">Contact</a></td>
+                        </tr>
+                        
                     </tbody>
                 </table>
             </div>
@@ -305,16 +258,19 @@
         </div>
         <div class="social-media">
             
-            <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-icon">
+                <i class="fab fa-facebook-f"></i>
+            </a>
             
-            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-icon">
+                <i class="fab fa-twitter"></i>
+            </a>
             
-            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-icon">
+                <i class="fab fa-instagram"></i>
+            </a>
             
         </div>
     </header>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="./script.js"></script>
 </body>
 </html>

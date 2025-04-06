@@ -43,40 +43,57 @@ router.put('/:websiteId', async (req, res) => {
 
 
 router.post('/', async (req, res) => {
-    const { name } = req.body; // Get the website name from the request body
-  
-    if (!name) {
-      return res.status(400).json({ message: 'Website name is required' });
-    }
-  
-    try {
-      // Create a new website with the provided name
-      const newWebsite = new Website({
-        name: name,
-        content: {}, // Initialize the content as an empty object
-      });
-  
-      // Save the website to the database
-      const savedWebsite = await newWebsite.save();
-  
-      res.status(201).json(savedWebsite); // Send the saved website back to the client
-    } catch (error) {
-      console.error('Error adding website:', error);
-      res.status(500).json({ message: 'Error adding website' });
-    }
-  });
+  const { name, type } = req.body; // Get both name and type from request body
 
-// Get all websites (templates)
+  if (!name || !type) {
+    return res.status(400).json({ message: 'Website name and type are required' });
+  }
+
+  try {
+    // Create a new website with name and type
+    const newWebsite = new Website({
+      name: name,
+      type: type,
+      content: {}, // Initialize the content as an empty object
+    });
+
+    const savedWebsite = await newWebsite.save();
+    res.status(201).json(savedWebsite);
+  } catch (error) {
+    console.error('Error adding website:', error);
+    res.status(500).json({ message: 'Error adding website' });
+  }
+});
+
+
+// Get all websites (templates) filtered by type
 router.get('/', async (req, res) => {
-    try {
-      // Fetch all websites from the database
-      const websites = await Website.find({});
-      res.status(200).json(websites); // Send the list of websites to the frontend
-    } catch (error) {
-      console.error('Error fetching websites:', error);
-      res.status(500).json({ message: 'Error fetching websites' });
+  try {
+    const { type } = req.query;
+    
+    // Create filter object
+    const filter = {};
+    if (type) {
+      filter.type = type;
     }
-  });
+
+    // Fetch websites with optional type filter
+    const websites = await Website.find(filter);
+    
+    if (!websites || websites.length === 0) {
+      return res.status(404).json({ 
+        message: type 
+          ? `No websites found for type: ${type}`
+          : 'No websites found'
+      });
+    }
+
+    res.status(200).json(websites);
+  } catch (error) {
+    console.error('Error fetching websites:', error);
+    res.status(500).json({ message: 'Error fetching websites' });
+  }
+});
 
 // Route to update the website page content
 // router.put('/api/templates/:websiteId', async (req, res) => {

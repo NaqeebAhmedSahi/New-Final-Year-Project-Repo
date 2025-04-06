@@ -22,6 +22,12 @@ const websiteSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  type: {
+    type: String,
+    enum: ['ecommerce', 'blog', 'portfolio'],
+    required: true,
+    default: 'ecommerce'
+  },
   content: {
     type: Map,
     of: contentSchema,

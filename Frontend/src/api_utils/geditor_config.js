@@ -22,6 +22,7 @@ import tailwindComponent from "../plugins/tailwind";
 import swiperComponent from "../plugins/swiper";
 import chartLibComponent from "../plugins/charts";
 
+
 // Counter variable to prevent re-initialization
 let renderCount = false;
 console.log("Render Count", renderCount);
@@ -38,13 +39,17 @@ const fetchPageContent = async (websiteId, pageId) => {
     const userProject = JSON.parse(localStorage.getItem('userProject'));
     console.log("User Project",userProject.customPrompt);
 
-    
+    const projectType = userProject?.projectType || 'blog'; 
     const formData = new FormData();
     formData.append('prompt', userProject.customPrompt);
     formData.append('template_file', 'index.html');
     formData.append('pageId', pageId);
     formData.append('websiteId', websiteId);
-
+    formData.append('projectType', projectType);
+    console.log("User Project Data:", {
+      customPrompt: userProject.customPrompt,
+      projectType: projectType
+    });
 
     console.log(pageId);
 

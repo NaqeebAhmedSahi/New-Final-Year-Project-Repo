@@ -99,7 +99,7 @@ router.post('/grape', async (req, res) => {
 
 router.post('/api/chat', upload.none(), async (req, res) => {
   try {
-    const { prompt, template_file, pageId, websiteId } = req.body;
+    const { prompt, template_file, pageId, websiteId, projectType } = req.body;
 
     if (!prompt || !template_file) {
       return res.status(400).json({ error: 'Prompt and template file are required' });
@@ -120,9 +120,17 @@ router.post('/api/chat', upload.none(), async (req, res) => {
     const content = website.content;
     const pageName = page.name;
     const pageContent = content.get(pageName);
-
+    let pythonScriptPath = ''
     // Configure paths
-    const pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'chatbot.py');
+    if (projectType == 'ecommerce') {
+      pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'chatbot.py');
+    }
+    else if (projectType == 'blog') {
+      pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'blogChatbot.py');
+    }
+    else if (projectType == 'portfolio') {
+      pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'portfolioChatbot.py');
+    }
     const outputDir = path.join(__dirname, '..', 'rendered_templates');
     const outputFilePath = path.join(outputDir, `rendered_${pageName}.html`);
 
@@ -132,8 +140,8 @@ router.post('/api/chat', upload.none(), async (req, res) => {
     }
 
     // Execute Python script with error handling
-    const pythonProcess = spawn('python', [pythonScriptPath, prompt, pageName, pageName]);
-    
+    const pythonProcess = spawn('python', [pythonScriptPath, prompt, `${pageName}.html`, pageName]);
+
     let pythonOutput = '';
     let pythonError = '';
 

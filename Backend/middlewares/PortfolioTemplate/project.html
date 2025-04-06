@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="hero-projects">
+        <div class="hero-content">
+            <h1>My <span>Work</span></h1>
+            <p>{{ portfolio.pages.projects.hero.subtitle }}</p>
+            <div class="filter-bar">
+                {% for filter in portfolio.pages.projects.hero.filters %}
+                <button class="filter-btn {% if filter.active %}active{% endif %}" data-category="{{ filter.category }}">{{ filter.name }}</button>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    
+    <section class="projects">
+        <div class="projects-container">
+            {% for project in portfolio.pages.projects.gallery %}
+            <div class="project-card">
+                <img src="{{ project.image }}" alt="{{ project.title }}">
+                <div class="overlay">
+                    <h3>{{ project.title }}</h3>
+                    <p>{{ project.tags|join(', ') }}</p>
+                    <a href="#" class="view-btn">View Case Study</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="case-study">
+        <div class="case-study-container">
+            <div class="case-study-text">
+                <h2>{{ portfolio.pages.projects.case_study.title }}</h2>
+                <p class="problem"><strong>Problem:</strong> {{ portfolio.pages.projects.case_study.problem }}</p>
+                <p class="role"><strong>My Role:</strong> {{ portfolio.pages.projects.case_study.role }}</p>
+                <p class="result"><strong>Key Result:</strong> {{ portfolio.pages.projects.case_study.result }}</p>
+                <a href="#" class="case-study-btn">Read Full Case Study →</a>
+            </div>
+            <div class="case-study-image">
+                <img src="{{ portfolio.pages.projects.case_study.image }}" alt="Before and After">
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials">
+        <div class="testimonials-container">
+            {% for testimonial in portfolio.pages.projects.testimonials.items1 %}
+            <div class="testimonial-card">
+                <p class="quote">"{{ testimonial.quote }}"</p>
+                <div class="client-info">
+                    <img src="{{ testimonial.logo }}" alt="Company Logo">
+                    <div class="client-text">
+                        <h4>{{ testimonial.name }}</h4>
+                        <p>{{ testimonial.position }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="process">
+        <h2>{{ portfolio.pages.projects.process.title }}</h2>
+        
+        <div class="timeline">
+            {% for step in portfolio.pages.projects.process.steps %}
+            <div class="timeline-step">
+                <img src="{{ step.icon }}" alt="{{ step.title }}">
+                <h3>{{ step.title }}</h3>
+                <p>{{ step.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    
+        <h2>Tools I Use</h2>
+        <div class="toolkit-carousel">
+            {% for tool in portfolio.pages.projects.process.tools %}
+            <div class="tool"><img src="{{ tool.icon }}" alt="{{ tool.name }}"></div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>{{ portfolio.pages.projects.cta.title }}</h2>
+        <p>{{ portfolio.pages.projects.cta.content }}</p>
+        <div class="cta-buttons">
+            {% for button in portfolio.pages.projects.cta.buttons %}
+            <a href="{{ button.url }}" class="{% if button.type == 'primary' %}btn-primary{% else %}btn-secondary{% endif %}">{{ button.text }}</a>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}
