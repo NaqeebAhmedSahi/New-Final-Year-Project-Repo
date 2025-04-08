@@ -14,7 +14,7 @@ from keras.layers import Dense, Activation, Dropout
 from keras.optimizers import SGD
 
 lemmatizer = WordNetLemmatizer()
-intents = json.loads(open("./Datasets/eCommerce.json", encoding='utf-8').read())
+intents = json.loads(open("./Datasets/blog.json", encoding='utf-8').read())
 print(json.dumps(intents, indent=4, ensure_ascii=False)) 
 words = []
 classes = []
@@ -39,8 +39,8 @@ words = sorted(set(words))
 
 classes = sorted(set(classes))
 
-pickle.dump(words, open('./EcommerceEssense/words.pkl', 'wb'))
-pickle.dump(classes, open('./EcommerceEssense/classes.pkl', 'wb'))
+pickle.dump(words, open('./BlogEssense/words.pkl', 'wb'))
+pickle.dump(classes, open('./BlogEssense/classes.pkl', 'wb'))
 
 # Split the data into training and validation sets
 train_documents, val_documents = train_test_split(documents, test_size=0.1, random_state=42)
@@ -91,5 +91,5 @@ model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy
 
 hist = model.fit(train_X, train_Y, epochs=40, batch_size=5, verbose=1, validation_data=(val_X, val_Y))  # Add validation_data
 
-model.save('./EcommerceEssense/chatbot_model1.keras')
+model.save('./BlogEssense/chatbot_model1.keras')
 print("done")
