@@ -117,96 +117,100 @@ router.post('/api/chat', upload.none(), async (req, res) => {
       return res.status(404).json({ message: 'Website not found' });
     }
 
-    const content = website.content;
-    const pageName = page.name;
-    const pageContent = content.get(pageName);
-    let pythonScriptPath = ''
-    // Configure paths
-    if (projectType == 'ecommerce') {
-      pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'chatbot.py');
-    }
-    else if (projectType == 'blog') {
-      pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'blogChatbot.py');
-    }
-    else if (projectType == 'portfolio') {
-      pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'portfolioChatbot.py');
-    }
-    const outputDir = path.join(__dirname, '..', 'rendered_templates');
-    const outputFilePath = path.join(outputDir, `rendered_${pageName}.html`);
+    if (page.status === 'new') {
+      return res.json({ status: 'new' });
+    } else if (page.status === 'existing') {
+      const content = website.content;
+      const pageName = page.name;
+      const pageContent = content.get(pageName);
+      let pythonScriptPath = '';
 
-    // Ensure directory exists
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
-
-    // Execute Python script with error handling
-    const pythonProcess = spawn('python', [pythonScriptPath, prompt, `${pageName}.html`, pageName]);
-
-    let pythonOutput = '';
-    let pythonError = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      pythonOutput += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      pythonError += data.toString();
-    });
-
-    pythonProcess.on('close', async (code) => {
-      try {
-        // Parse the Python script output
-        let result;
-        try {
-          result = JSON.parse(pythonOutput);
-        } catch (parseError) {
-          console.error('Failed to parse Python output:', pythonOutput);
-          throw new Error(`Python output parse error: ${parseError.message}`);
-        }
-
-        // Handle Python script errors
-        if (code !== 0 || pythonError || result.error) {
-          const errorDetails = {
-            exitCode: code,
-            stderr: pythonError,
-            pythonOutput: result.error || pythonOutput
-          };
-          console.error('Python script failed:', errorDetails);
-          return res.status(500).json({
-            error: 'Python script execution failed',
-            details: errorDetails
-          });
-        }
-
-        // Verify the output file was created
-        if (!fs.existsSync(outputFilePath)) {
-          console.error('Expected file not found:', outputFilePath);
-          return res.status(500).json({
-            error: 'Generated HTML file not found',
-            details: `Python script did not create ${outputFilePath}`
-          });
-        }
-
-        const renderedHtml = fs.readFileSync(outputFilePath, 'utf-8');
-        pageContent.htmlContent = renderedHtml;
-
-        return res.json({
-          status: 'success',
-          name: pageName,
-          content: pageContent,
-          pythonOutput: result // Include full Python output for debugging
-        });
-
-      } catch (error) {
-        console.error('Post-processing error:', error);
-        res.status(500).json({
-          error: 'Failed to process Python script output',
-          details: error.message,
-          pythonError: pythonError,
-          pythonOutput: pythonOutput
-        });
+      // Configure paths
+      if (projectType == 'ecommerce') {
+        pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'chatbot.py');
+      } else if (projectType == 'blog') {
+        pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'blogChatbot.py');
+      } else if (projectType == 'portfolio') {
+        pythonScriptPath = path.join(__dirname, '..', 'middlewares', 'portfolioChatbot.py');
       }
-    });
+
+      const outputDir = path.join(__dirname, '..', 'rendered_templates');
+      const outputFilePath = path.join(outputDir, `rendered_${pageName}.html`);
+
+      // Ensure directory exists
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+
+      // Execute Python script with error handling
+      const pythonProcess = spawn('python', [pythonScriptPath, prompt, `${pageName}.html`, pageName]);
+
+      let pythonOutput = '';
+      let pythonError = '';
+
+      pythonProcess.stdout.on('data', (data) => {
+        pythonOutput += data.toString();
+      });
+
+      pythonProcess.stderr.on('data', (data) => {
+        pythonError += data.toString();
+      });
+
+      pythonProcess.on('close', async (code) => {
+        try {
+          // Parse the Python script output
+          let result;
+          try {
+            result = JSON.parse(pythonOutput);
+          } catch (parseError) {
+            console.error('Failed to parse Python output:', pythonOutput);
+            throw new Error(`Python output parse error: ${parseError.message}`);
+          }
+
+          // Handle Python script errors
+          if (code !== 0 || pythonError || result.error) {
+            const errorDetails = {
+              exitCode: code,
+              stderr: pythonError,
+              pythonOutput: result.error || pythonOutput
+            };
+            console.error('Python script failed:', errorDetails);
+            return res.status(500).json({
+              error: 'Python script execution failed',
+              details: errorDetails
+            });
+          }
+
+          // Verify the output file was created
+          if (!fs.existsSync(outputFilePath)) {
+            console.error('Expected file not found:', outputFilePath);
+            return res.status(500).json({
+              error: 'Generated HTML file not found',
+              details: `Python script did not create ${outputFilePath}`
+            });
+          }
+
+          const renderedHtml = fs.readFileSync(outputFilePath, 'utf-8');
+          pageContent.htmlContent = renderedHtml;
+
+          return res.json({
+            status: 'success',
+            name: pageName,
+            content: pageContent,
+            pythonOutput: result
+          });
+
+        } catch (error) {
+          console.error('Post-processing error:', error);
+          res.status(500).json({
+            error: 'Failed to process Python script output',
+            details: error.message,
+            pythonError: pythonError,
+            pythonOutput: pythonOutput
+          });
+        }
+      });
+    } 
 
   } catch (error) {
     console.error('Server error:', error);
@@ -216,4 +220,5 @@ router.post('/api/chat', upload.none(), async (req, res) => {
     });
   }
 });
+
 export default router;
